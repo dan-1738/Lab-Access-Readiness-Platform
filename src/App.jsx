@@ -1,4 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, get, set } from "firebase/database";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDrB5rNbZ1-ZdPpZlvWfeGf5Z_eHmj8k0s",
+  authDomain: "lab-access-readiness.firebaseapp.com",
+  databaseURL: "https://lab-access-readiness-default-rtdb.firebaseio.com",
+  projectId: "lab-access-readiness",
+  storageBucket: "lab-access-readiness.firebasestorage.app",
+  messagingSenderId: "932035313042",
+  appId: "1:932035313042:web:a9fbd0d9557ad665e2154b"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
 
 // ─── 60 QUESTIONS ───────────────────────────────────────────────────────────
 const ALL_QUESTIONS = [
@@ -289,7 +304,7 @@ function hashPw(pw) {
   return h.toString(36);
 }
 
-// ─── STORAGE KEYS ───────────────────────────────────────────────────────────
+// ─── FIREBASE STORAGE ────────────────────────────────────────────────────────
 const K = {
   users: "lab_users",
   attempts: "lab_attempts",
@@ -297,11 +312,14 @@ const K = {
 };
 
 async function sGet(key) {
-  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; }
-  catch { return null; }
+  try {
+    const snapshot = await get(ref(db, key));
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch { return null; }
 }
+
 async function sSet(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+  try { await set(ref(db, key), val); } catch (e) { console.error("Firebase write error:", e); }
 }
 
 // Pre-seed admin accounts if not present
@@ -335,7 +353,7 @@ export default function App() {
   const reload = useCallback(async () => {
     const [u, a, up] = await Promise.all([sGet(K.users), sGet(K.attempts), sGet(K.pathways)]);
     setUsers(u || {});
-    setAttempts(a || []);
+    setAttempts(a ? Object.values(a) : []);
     setUserPathways(up || {});
   }, []);
 
@@ -344,14 +362,19 @@ export default function App() {
       setUsers(u || {});
       return Promise.all([sGet(K.attempts), sGet(K.pathways)]);
     }).then(([a, up]) => {
-      setAttempts(a || []);
+      setAttempts(a ? Object.values(a) : []);
       setUserPathways(up || {});
       setPage("login");
     });
   }, []);
 
   const saveUsers = async (u) => { setUsers(u); await sSet(K.users, u); };
-  const saveAttempts = async (a) => { setAttempts(a); await sSet(K.attempts, a); };
+  const saveAttempts = async (a) => {
+    setAttempts(a);
+    const obj = {};
+    a.forEach(item => { obj[item.id] = item; });
+    await sSet(K.attempts, obj);
+  };
   const saveUP = async (up) => { setUserPathways(up); await sSet(K.pathways, up); };
 
   const handleLogin = async (email, pw) => {
