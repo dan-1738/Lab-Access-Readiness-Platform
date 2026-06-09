@@ -1241,13 +1241,6 @@ function Register({ onRegister, onBack }) {
     </div>
   );
 
-  const F = ({ k, label, type = "text", placeholder = "", req = true }) => (
-    <div style={{ marginBottom: 12 }}>
-      <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>{label}{req && <span style={{ color: "#1D9E75" }}>*</span>}</label>
-      <input type={type} value={form[k]} onChange={e => set(k, e.target.value)} required={req} placeholder={placeholder} style={{ width: "100%" }} />
-    </div>
-  );
-
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: 20 }}>
       <div style={{ textAlign: "center", marginBottom: 20 }}>
@@ -1262,13 +1255,34 @@ function Register({ onRegister, onBack }) {
         {err && <div style={{ background: "var(--color-background-danger)", border: "0.5px solid var(--color-border-danger)", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "var(--color-text-danger)", marginBottom: 14 }}>{err}</div>}
         <div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 12px" }}>
-            <div style={{ gridColumn: "1/-1" }}><F k="name" label="Full name" placeholder="Dr. Amina Mwangi" /></div>
-            <div style={{ gridColumn: "1/-1" }}><F k="email" label="Email address" type="email" placeholder="amina@suza.ac.tz" /></div>
-            <F k="password" label="Password" type="password" placeholder="Min. 8 characters" />
-            <F k="confirm" label="Confirm password" type="password" placeholder="Repeat password" />
-            <div style={{ gridColumn: "1/-1" }}><F k="institution" label="Institution / organisation" placeholder="State University of Zanzibar" /></div>
-            <F k="position" label="Position / title" placeholder="Research Technician" />
-            <F k="department" label="Department" placeholder="Marine Biology" req={false} />
+            <div style={{ gridColumn: "1/-1", marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Full name<span style={{ color: "#1D9E75" }}>*</span></label>
+              <input type="text" value={form.name} onChange={e => set("name", e.target.value)} placeholder="Dr. Amina Mwangi" style={{ width: "100%" }} />
+            </div>
+            <div style={{ gridColumn: "1/-1", marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Email address<span style={{ color: "#1D9E75" }}>*</span></label>
+              <input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="amina@suza.ac.tz" style={{ width: "100%" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Password<span style={{ color: "#1D9E75" }}>*</span></label>
+              <input type="password" value={form.password} onChange={e => set("password", e.target.value)} placeholder="Min. 8 characters" style={{ width: "100%" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Confirm password<span style={{ color: "#1D9E75" }}>*</span></label>
+              <input type="password" value={form.confirm} onChange={e => set("confirm", e.target.value)} placeholder="Repeat password" style={{ width: "100%" }} />
+            </div>
+            <div style={{ gridColumn: "1/-1", marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Institution / organisation<span style={{ color: "#1D9E75" }}>*</span></label>
+              <input type="text" value={form.institution} onChange={e => set("institution", e.target.value)} placeholder="State University of Zanzibar" style={{ width: "100%" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Position / title<span style={{ color: "#1D9E75" }}>*</span></label>
+              <input type="text" value={form.position} onChange={e => set("position", e.target.value)} placeholder="Research Technician" style={{ width: "100%" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Department</label>
+              <input type="text" value={form.department} onChange={e => set("department", e.target.value)} placeholder="Marine Biology" style={{ width: "100%" }} />
+            </div>
           </div>
           <button onClick={handle} disabled={loading} style={{ width: "100%", padding: "9px 0", background: "#1D9E75", border: "none", borderRadius: "var(--border-radius-md)", color: "#fff", fontSize: 13, fontWeight: 500, cursor: loading ? "wait" : "pointer", marginTop: 6 }}>
             {loading ? "Submitting..." : "Submit registration"}
