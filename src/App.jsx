@@ -1296,29 +1296,7 @@ function Login({ onLogin, onRegister }) {
         </div>
       </div>
     </div>
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Email address</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={onKey} placeholder="your@email.com" style={{ width: "100%" }} />
-          </div>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Password</label>
-            <div style={{ position: "relative" }}>
-              <input type={showPw ? "text" : "password"} value={pw} onChange={e => setPw(e.target.value)} onKeyDown={onKey} placeholder="Password" style={{ width: "100%", paddingRight: 36 }} />
-              <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--color-text-secondary)" }}>
-                <i className={`ti ti-eye${showPw ? "-off" : ""}`} style={{ fontSize: 16 }} aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-          <button onClick={handle} disabled={loading} style={{ width: "100%", padding: "9px 0", background: "#1D9E75", border: "none", borderRadius: "var(--border-radius-md)", color: "#fff", fontSize: 13, fontWeight: 500, cursor: loading ? "wait" : "pointer" }}>
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </div>
-        <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--color-text-secondary)" }}>
-          No account?{" "}
-          <button onClick={onRegister} style={{ background: "none", border: "none", cursor: "pointer", color: "#0F6E56", fontWeight: 500, fontSize: 12, padding: 0 }}>Register here</button>
-        </div>
-        <div style={{ marginTop: 20, padding: "10px 12px", background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", fontSize: 11, color: "var(--color-text-secondary)" }}>
-          <strong style={{ color: "var(--color-text-primary)" }}>Admin logins:</strong> danford.mkunda@cbiio.com · lavine.irvine@cbiio.com · steven.sillah@cbiio.com
+  );
 }
 
 function Register({ onRegister, onBack }) {
