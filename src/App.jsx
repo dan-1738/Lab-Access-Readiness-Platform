@@ -358,13 +358,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    ensureAdminSeeded().then(u => {
+    ensureAdminSeeded().then(async (u) => {
       setUsers(u || {});
-      return Promise.all([sGet(K.attempts), sGet(K.pathways)]);
-    }).then(([a, up]) => {
+      const [a, up] = await Promise.all([sGet(K.attempts), sGet(K.pathways)]);
       setAttempts(a ? Object.values(a) : []);
       setUserPathways(up || {});
-      setPage("login");
+      // Restore session
+      const savedId = localStorage.getItem("lab_session_uid");
+      if (savedId && u && u[savedId] && u[savedId].status === "approved") {
+        setMe(u[savedId]);
+        setPage(u[savedId].role === "admin" ? "admin_dash" : "dashboard");
+      } else {
+        setPage("login");
+      }
     });
   }, []);
 
@@ -386,6 +392,7 @@ export default function App() {
     if (u.status === "pending_approval") return "Your account is awaiting administrator approval.";
     if (u.status === "rejected") return "Your application has been rejected. Contact the laboratory administrator.";
     if (u.status === "suspended") return "Your account has been suspended. Contact the laboratory administrator.";
+    localStorage.setItem("lab_session_uid", u.id);
     setMe(u);
     setPage(u.role === "admin" ? "admin_dash" : "dashboard");
     return null;
@@ -409,7 +416,7 @@ export default function App() {
     return null;
   };
 
-  const logout = () => { setMe(null); setPage("login"); };
+  const logout = () => { localStorage.removeItem("lab_session_uid"); setMe(null); setPage("login"); };
 
   const approveUser = async (uid) => {
     const u = { ...users[uid], status: "approved" };
@@ -429,9 +436,24 @@ export default function App() {
     await reload();
   };
 
-  const startQuiz = (pathwayId) => {
+  const deleteUser = async (uid) => {
+    const newUsers = { ...users };
+    delete newUsers[uid];
+    await saveUsers(newUsers);
+    // Also clean up their pathways and attempts
+    const newUP = { ...userPathways };
+    Object.keys(newUP).forEach(k => { if (k.startsWith(uid)) delete newUP[k]; });
+    await saveUP(newUP);
+    const newAttempts = attempts.filter(a => a.userId !== uid);
+    await saveAttempts(newAttempts);
+    await reload();
+  };
+
+  const startQuiz = async (pathwayId) => {
     const pw = PATHWAYS.find(p => p.id === pathwayId);
-    const pool = shuffle(ALL_QUESTIONS).slice(0, pw.questions);
+    const customQs = await sGet("lab_custom_questions");
+    const allQs = [...ALL_QUESTIONS, ...(customQs ? Object.values(customQs) : [])];
+    const pool = shuffle(allQs).slice(0, pw.questions);
     const qs = pool.map(q => ({
       ...q,
       shuffledOpts: shuffle(q.opts.map((o, i) => ({ text: o, origIdx: i }))),
@@ -497,7 +519,7 @@ export default function App() {
   if (me.role === "admin") return (
     <AdminLayout me={me} onLogout={logout} page={page} setPage={setPage}
       users={users} attempts={attempts} userPathways={userPathways}
-      onApprove={approveUser} onReject={rejectUser} reload={reload} />
+      onApprove={approveUser} onReject={rejectUser} onDelete={deleteUser} reload={reload} />
   );
 
   return (
@@ -915,12 +937,13 @@ function Result({ result, pw, onBack, onRetake }) {
 }
 
 // ─── ADMIN LAYOUT ────────────────────────────────────────────────────────────
-function AdminLayout({ me, onLogout, page, setPage, users, attempts, userPathways, onApprove, onReject, reload }) {
+function AdminLayout({ me, onLogout, page, setPage, users, attempts, userPathways, onApprove, onReject, onDelete, reload }) {
   const navItems = [
     { id: "s1", label: "Admin", section: true },
     { id: "admin_dash", label: "Overview", icon: "ti-layout-dashboard" },
     { id: "admin_users", label: "Users", icon: "ti-users" },
     { id: "admin_progress", label: "Progress", icon: "ti-chart-bar" },
+    { id: "admin_questions", label: "Questions", icon: "ti-list-check" },
   ];
   const curPage = page.startsWith("admin") ? page : "admin_dash";
 
@@ -931,8 +954,9 @@ function AdminLayout({ me, onLogout, page, setPage, users, attempts, userPathway
         <Sidebar items={navItems} active={curPage} onNav={setPage} />
         <div style={{ flex: 1, overflowY: "auto" }}>
           {curPage === "admin_dash" && <AdminDash users={users} attempts={attempts} userPathways={userPathways} onApprove={onApprove} onReject={onReject} reload={reload} />}
-          {curPage === "admin_users" && <AdminUsers users={users} attempts={attempts} userPathways={userPathways} onApprove={onApprove} onReject={onReject} reload={reload} />}
+          {curPage === "admin_users" && <AdminUsers users={users} attempts={attempts} userPathways={userPathways} onApprove={onApprove} onReject={onReject} onDelete={onDelete} reload={reload} />}
           {curPage === "admin_progress" && <AdminProgress users={users} attempts={attempts} userPathways={userPathways} />}
+          {curPage === "admin_questions" && <AdminQuestions />}
         </div>
       </div>
     </div>
@@ -1024,8 +1048,9 @@ function AdminDash({ users, attempts, userPathways, onApprove, onReject, reload 
   );
 }
 
-function AdminUsers({ users, attempts, userPathways, onApprove, onReject, reload }) {
+function AdminUsers({ users, attempts, userPathways, onApprove, onReject, onDelete, reload }) {
   const [filter, setFilter] = useState("all");
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const candidates = Object.values(users).filter(u => u.role === "candidate");
   const filtered = filter === "all" ? candidates : candidates.filter(u => u.status === filter);
 
@@ -1074,6 +1099,16 @@ function AdminUsers({ users, attempts, userPathways, onApprove, onReject, reload
                     </button>
                   </div>
                 )}
+                {confirmDelete === u.id
+                  ? <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0, marginLeft: 6 }}>
+                      <span style={{ fontSize: 11, color: "#993C1D" }}>Delete permanently?</span>
+                      <button onClick={() => { onDelete(u.id); setConfirmDelete(null); }} style={{ fontSize: 11, padding: "4px 8px", border: "0.5px solid #E24B4A", borderRadius: 6, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D", fontWeight: 500 }}>Yes</button>
+                      <button onClick={() => setConfirmDelete(null)} style={{ fontSize: 11, padding: "4px 8px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 6, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>No</button>
+                    </div>
+                  : <button onClick={() => setConfirmDelete(u.id)} style={{ fontSize: 11, padding: "5px 8px", border: "0.5px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "transparent", color: "#993C1D", marginLeft: 6, flexShrink: 0 }}>
+                      <i className="ti ti-trash" style={{ fontSize: 11 }} /> Delete
+                    </button>
+                }
               </div>
             </div>
           );
@@ -1192,19 +1227,75 @@ function Login({ onLogin, onRegister }) {
   const onKey = (e) => { if (e.key === "Enter") handle(); };
 
   return (
-    <div style={{ maxWidth: 420, margin: "0 auto", padding: 20 }}>
-      <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-          <i className="ti ti-flask" style={{ fontSize: 24, color: "#0F6E56" }} aria-hidden="true" />
-          <span style={{ fontSize: 16, fontWeight: 500 }}>Lab Access Readiness</span>
-        </div>
-        <div style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>SUZA Seaweed Tissue Culture Laboratory</div>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", background: "#0a2e1f" }}>
+      {/* Animated tissue culture background */}
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+        {/* Grid pattern */}
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(29,158,117,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(29,158,117,0.08) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        {/* Glowing blobs - simulating petri dishes / cell cultures */}
+        {[
+          { top: "10%", left: "5%", size: 220, color: "rgba(29,158,117,0.15)", delay: "0s" },
+          { top: "60%", left: "2%", size: 160, color: "rgba(15,110,86,0.2)", delay: "1s" },
+          { top: "20%", right: "8%", size: 280, color: "rgba(29,158,117,0.12)", delay: "0.5s" },
+          { top: "70%", right: "5%", size: 200, color: "rgba(93,202,165,0.15)", delay: "1.5s" },
+          { top: "45%", left: "45%", size: 300, color: "rgba(15,110,86,0.1)", delay: "2s" },
+        ].map((b, i) => (
+          <div key={i} style={{ position: "absolute", top: b.top, left: b.left, right: b.right, width: b.size, height: b.size, borderRadius: "50%", background: `radial-gradient(circle, ${b.color}, transparent 70%)`, filter: "blur(20px)", animation: `pulse 4s ease-in-out ${b.delay} infinite alternate` }} />
+        ))}
+        {/* Floating circles - cells */}
+        {[
+          { top: "15%", left: "20%", size: 60 }, { top: "35%", left: "8%", size: 40 },
+          { top: "75%", left: "25%", size: 50 }, { top: "55%", right: "20%", size: 45 },
+          { top: "25%", right: "25%", size: 55 }, { top: "80%", right: "30%", size: 35 },
+          { top: "5%", left: "50%", size: 30 }, { top: "90%", left: "50%", size: 45 },
+        ].map((c, i) => (
+          <div key={i} style={{ position: "absolute", top: c.top, left: c.left, right: c.right, width: c.size, height: c.size, borderRadius: "50%", border: "1px solid rgba(29,158,117,0.3)", background: "rgba(29,158,117,0.05)" }} />
+        ))}
+        <style>{`@keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.2); opacity: 1; } }`}</style>
       </div>
-      <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 24 }}>
-        <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 4 }}>Sign in</div>
-        <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginBottom: 20 }}>Access your readiness pathways and records</div>
-        {err && <div style={{ background: "var(--color-background-danger)", border: "0.5px solid var(--color-border-danger)", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "var(--color-text-danger)", marginBottom: 16 }}>{err}</div>}
-        <div>
+
+      {/* Login card */}
+      <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: 400, padding: 20 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(29,158,117,0.2)", border: "1px solid rgba(29,158,117,0.4)", marginBottom: 12 }}>
+            <i className="ti ti-flask" style={{ fontSize: 26, color: "#5DCAA5" }} />
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: "#ffffff", marginBottom: 4 }}>Lab Access Readiness</div>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>SUZA Seaweed Tissue Culture Laboratory</div>
+        </div>
+
+        <div style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(29,158,117,0.3)", borderRadius: 16, padding: 28 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", marginBottom: 4 }}>Sign in</div>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 20 }}>Access your readiness pathways and records</div>
+          {err && <div style={{ background: "rgba(220,38,38,0.15)", border: "1px solid rgba(220,38,38,0.4)", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#FCA5A5", marginBottom: 16 }}>{err}</div>}
+          <div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.6)", marginBottom: 5 }}>Email address</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={onKey} placeholder="your@email.com"
+                style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(29,158,117,0.3)", borderRadius: 8, padding: "9px 12px", color: "#fff", fontSize: 13 }} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.6)", marginBottom: 5 }}>Password</label>
+              <div style={{ position: "relative" }}>
+                <input type={showPw ? "text" : "password"} value={pw} onChange={e => setPw(e.target.value)} onKeyDown={onKey} placeholder="Password"
+                  style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(29,158,117,0.3)", borderRadius: 8, padding: "9px 36px 9px 12px", color: "#fff", fontSize: 13 }} />
+                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)" }}>
+                  <i className={`ti ti-eye${showPw ? "-off" : ""}`} style={{ fontSize: 16 }} />
+                </button>
+              </div>
+            </div>
+            <button onClick={handle} disabled={loading}
+              style={{ width: "100%", padding: "10px 0", background: "linear-gradient(135deg, #1D9E75, #0F6E56)", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 600, cursor: loading ? "wait" : "pointer", letterSpacing: "0.02em" }}>
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
+          </div>
+          <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
+            No account?{" "}
+            <button onClick={onRegister} style={{ background: "none", border: "none", cursor: "pointer", color: "#5DCAA5", fontWeight: 500, fontSize: 12, padding: 0 }}>Register here</button>
+          </div>
+        </div>
+      </div>
+    </div>
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Email address</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={onKey} placeholder="your@email.com" style={{ width: "100%" }} />
@@ -1228,10 +1319,6 @@ function Login({ onLogin, onRegister }) {
         </div>
         <div style={{ marginTop: 20, padding: "10px 12px", background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", fontSize: 11, color: "var(--color-text-secondary)" }}>
           <strong style={{ color: "var(--color-text-primary)" }}>Admin logins:</strong> danford.mkunda@cbiio.com · lavine.irvine@cbiio.com · steven.sillah@cbiio.com
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function Register({ onRegister, onBack }) {
@@ -1343,4 +1430,223 @@ function UStatusBadge({ status }) {
   };
   const s = map[status] || map.suspended;
   return <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: s.bg, color: s.color, fontWeight: 500, whiteSpace: "nowrap" }}>{s.label}</span>;
+}
+
+// ─── ADMIN QUESTIONS MANAGER ──────────────────────────────────────────────────
+const CATS = ["Biosafety Fundamentals","Laboratory Conduct & GMPP","PPE & Personal Protection","Risk Management","Chemical Safety","Waste Management","Incident Reporting","Governance & Compliance"];
+const EMPTY_Q = { cat: CATS[0], diff: "easy", ref: "", q: "", opts: ["","","",""], correct: 0, exp: "" };
+
+function AdminQuestions() {
+  const [questions, setQuestions] = useState([]);
+  const [editing, setEditing] = useState(null); // null = list, "new" = new form, id = edit form
+  const [form, setForm] = useState(EMPTY_Q);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filterCat, setFilterCat] = useState("all");
+  const [confirmDel, setConfirmDel] = useState(null);
+
+  useEffect(() => {
+    sGet("lab_custom_questions").then(q => setQuestions(q ? Object.values(q) : []));
+  }, []);
+
+  const saveQuestions = async (qs) => {
+    const obj = {};
+    qs.forEach(q => { obj[q.id] = q; });
+    await sSet("lab_custom_questions", obj);
+    setQuestions(qs);
+  };
+
+  const startNew = () => { setForm({ ...EMPTY_Q, opts: ["","","",""] }); setEditing("new"); };
+  const startEdit = (q) => { setForm({ ...q, opts: [...q.opts] }); setEditing(q.id); };
+  const cancelEdit = () => { setEditing(null); setForm(EMPTY_Q); };
+
+  const handleSave = async () => {
+    if (!form.q.trim()) { alert("Question text is required."); return; }
+    if (form.opts.filter(o => o.trim()).length < 2) { alert("At least 2 options are required."); return; }
+    setSaving(true);
+    const id = editing === "new" ? "cq_" + Date.now() : editing;
+    const newQ = { ...form, id, opts: form.opts.map(o => o.trim()).filter(Boolean) };
+    // Clamp correct index
+    if (newQ.correct >= newQ.opts.length) newQ.correct = 0;
+    const exists = questions.findIndex(q => q.id === id);
+    const newQs = exists >= 0
+      ? questions.map(q => q.id === id ? newQ : q)
+      : [...questions, newQ];
+    await saveQuestions(newQs);
+    setSaving(false);
+    setEditing(null);
+  };
+
+  const handleDelete = async (id) => {
+    await saveQuestions(questions.filter(q => q.id !== id));
+    setConfirmDel(null);
+  };
+
+  const setOpt = (i, val) => setForm(f => { const opts = [...f.opts]; opts[i] = val; return { ...f, opts }; });
+  const addOpt = () => { if (form.opts.length < 6) setForm(f => ({ ...f, opts: [...f.opts, ""] })); };
+  const removeOpt = (i) => setForm(f => {
+    const opts = f.opts.filter((_, idx) => idx !== i);
+    return { ...f, opts, correct: f.correct >= opts.length ? 0 : f.correct };
+  });
+
+  const filtered = questions.filter(q => {
+    const matchCat = filterCat === "all" || q.cat === filterCat;
+    const matchSearch = !search || q.q.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  const ipt = (val, onChange, ph = "", type = "text") => (
+    <input type={type} value={val} onChange={e => onChange(e.target.value)} placeholder={ph}
+      style={{ width: "100%", padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
+  );
+
+  if (editing !== null) return (
+    <div style={{ padding: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+        <button onClick={cancelEdit} style={{ fontSize: 12, padding: "5px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 7, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+          <i className="ti ti-arrow-left" style={{ fontSize: 12 }} /> Back
+        </button>
+        <div style={{ fontSize: 16, fontWeight: 500 }}>{editing === "new" ? "Add new question" : "Edit question"}</div>
+      </div>
+
+      <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 20, maxWidth: 700 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Category</label>
+            <select value={form.cat} onChange={e => setForm(f => ({ ...f, cat: e.target.value }))}
+              style={{ width: "100%", padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
+              {CATS.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Difficulty</label>
+            <select value={form.diff} onChange={e => setForm(f => ({ ...f, diff: e.target.value }))}
+              style={{ width: "100%", padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Reference (e.g. Section 3.1)</label>
+            {ipt(form.ref, v => setForm(f => ({ ...f, ref: v })), "Section 1.1")}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Question text <span style={{ color: "#1D9E75" }}>*</span></label>
+          <textarea value={form.q} onChange={e => setForm(f => ({ ...f, q: e.target.value }))} rows={3} placeholder="Type your question here..."
+            style={{ width: "100%", padding: "8px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 13, background: "var(--color-background-primary)", color: "var(--color-text-primary)", resize: "vertical", fontFamily: "inherit" }} />
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)" }}>Answer options <span style={{ color: "var(--color-text-tertiary)", fontWeight: 400 }}>(click radio to mark correct)</span></label>
+            {form.opts.length < 6 && <button onClick={addOpt} style={{ fontSize: 11, padding: "3px 8px", border: "0.5px solid #1D9E75", borderRadius: 6, cursor: "pointer", background: "#E1F5EE", color: "#0F6E56" }}>+ Add option</button>}
+          </div>
+          {form.opts.map((opt, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <div onClick={() => setForm(f => ({ ...f, correct: i }))}
+                style={{ width: 18, height: 18, borderRadius: "50%", border: form.correct === i ? "2px solid #1D9E75" : "1.5px solid var(--color-border-secondary)", cursor: "pointer", background: form.correct === i ? "#1D9E75" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {form.correct === i && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+              </div>
+              <div style={{ flex: 1 }}>
+                <input value={opt} onChange={e => setOpt(i, e.target.value)} placeholder={`Option ${i + 1}${form.correct === i ? " (correct)" : ""}`}
+                  style={{ width: "100%", padding: "7px 10px", border: `0.5px solid ${form.correct === i ? "#1D9E75" : "var(--color-border-tertiary)"}`, borderRadius: 7, fontSize: 12, background: form.correct === i ? "#E1F5EE" : "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
+              </div>
+              {form.opts.length > 2 && (
+                <button onClick={() => removeOpt(i)} style={{ fontSize: 11, padding: "4px 7px", border: "0.5px solid #F5C4B3", borderRadius: 6, cursor: "pointer", background: "#FAECE7", color: "#993C1D", flexShrink: 0 }}>
+                  <i className="ti ti-x" style={{ fontSize: 11 }} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Explanation (shown after answering)</label>
+          <textarea value={form.exp} onChange={e => setForm(f => ({ ...f, exp: e.target.value }))} rows={2} placeholder="Explain why the correct answer is correct..."
+            style={{ width: "100%", padding: "8px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)", resize: "vertical", fontFamily: "inherit" }} />
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={handleSave} disabled={saving}
+            style={{ fontSize: 13, padding: "8px 20px", border: "none", borderRadius: 8, cursor: saving ? "wait" : "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+            {saving ? "Saving..." : "Save question"}
+          </button>
+          <button onClick={cancelEdit} style={{ fontSize: 13, padding: "8px 16px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 500 }}>Question bank</div>
+          <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginTop: 3 }}>
+            {questions.length} custom question{questions.length !== 1 ? "s" : ""} — these are added to the question pool alongside the built-in 60
+          </div>
+        </div>
+        <button onClick={startNew} style={{ fontSize: 13, padding: "8px 16px", border: "none", borderRadius: 8, cursor: "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+          <i className="ti ti-plus" style={{ fontSize: 13 }} /> Add question
+        </button>
+      </div>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search questions..."
+          style={{ flex: 1, padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 8, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
+        <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
+          style={{ padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 8, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
+          <option value="all">All categories</option>
+          {CATS.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+
+      {filtered.length === 0
+        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
+            <i className="ti ti-list-check" style={{ fontSize: 32, display: "block", marginBottom: 8 }} />
+            <div style={{ fontSize: 14, fontWeight: 500 }}>{questions.length === 0 ? "No custom questions yet" : "No questions match your search"}</div>
+            <div style={{ fontSize: 12, marginTop: 4 }}>Click "Add question" to create your first custom question</div>
+          </div>
+        : filtered.map(q => (
+          <div key={q.id} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 14, marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: "#E6F1FB", color: "#0C447C", fontWeight: 500 }}>{q.cat}</span>
+                  <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: q.diff === "hard" ? "#FCEBEB" : q.diff === "medium" ? "#FAEEDA" : "#E1F5EE", color: q.diff === "hard" ? "#791F1F" : q.diff === "medium" ? "#633806" : "#085041", fontWeight: 500 }}>{q.diff}</span>
+                  {q.ref && <span style={{ fontSize: 10, color: "var(--color-text-tertiary)" }}>{q.ref}</span>}
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, lineHeight: 1.5 }}>{q.q}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+                  {q.opts.map((o, i) => (
+                    <div key={i} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, background: i === q.correct ? "#E1F5EE" : "var(--color-background-secondary)", color: i === q.correct ? "#0F6E56" : "var(--color-text-secondary)", border: i === q.correct ? "0.5px solid #9FE1CB" : "none", fontWeight: i === q.correct ? 500 : 400 }}>
+                      {i === q.correct && <i className="ti ti-check" style={{ fontSize: 10, marginRight: 3 }} />}{o}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+                <button onClick={() => startEdit(q)} style={{ fontSize: 11, padding: "5px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 7, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+                  <i className="ti ti-pencil" style={{ fontSize: 11 }} /> Edit
+                </button>
+                {confirmDel === q.id
+                  ? <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <span style={{ fontSize: 10, color: "#993C1D", textAlign: "center" }}>Delete?</span>
+                      <button onClick={() => handleDelete(q.id)} style={{ fontSize: 11, padding: "3px 8px", border: "0.5px solid #E24B4A", borderRadius: 6, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D" }}>Yes</button>
+                      <button onClick={() => setConfirmDel(null)} style={{ fontSize: 11, padding: "3px 8px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 6, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>No</button>
+                    </div>
+                  : <button onClick={() => setConfirmDel(q.id)} style={{ fontSize: 11, padding: "5px 10px", border: "0.5px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "#FAECE7", color: "#993C1D" }}>
+                      <i className="ti ti-trash" style={{ fontSize: 11 }} /> Delete
+                    </button>
+                }
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  );
 }
