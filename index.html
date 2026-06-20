@@ -10,7 +10,7 @@
     <style>
       *, *::before, *::after { box-sizing: border-box; }
       body { margin: 0; font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f7f7; }
-      #root { min-height: 100vh; padding: 20px; }
+      #root { min-height: 100vh; }
 
       /* CSS variables that the app references */
       :root {
@@ -41,10 +41,6 @@
       }
       input:focus { border-color: #1a5f8f; }
       button { font-family: inherit; }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+
+      /* Responsive shell — desktop persistent sidebar, mobile slide-in drawer,
+         same pattern as the LIMS (Layout.jsx): hidden md:flex / m
