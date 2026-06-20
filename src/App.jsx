@@ -543,19 +543,21 @@ function Loading() {
 // ─── TOPBAR ─────────────────────────────────────────────────────────────────
 function Topbar({ me, onLogout }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", padding: "0 16px", height: 44, borderBottom: "0.5px solid var(--color-border-tertiary)", background: "var(--color-background-primary)", flexShrink: 0 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500 }}>
-        <i className="ti ti-flask" style={{ fontSize: 16, color: "#0F6E56" }} aria-hidden="true" />
+    <div style={{ display: "flex", alignItems: "center", padding: "0 16px", height: 56, borderBottom: "1px solid #0b2839", background: "#071a26", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 600, color: "#ffffff" }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#154c72", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <i className="ti ti-flask" style={{ fontSize: 15, color: "#ffffff" }} aria-hidden="true" />
+        </div>
         Lab Access Readiness
       </div>
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, border: "0.5px solid var(--color-border-tertiary)", color: "var(--color-text-secondary)" }}>
+        <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, border: "1px solid #0b2839", color: "#99bbd3" }}>
           {me.role === "admin" ? "Administrator" : "Candidate"}
         </span>
-        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#E1F5EE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, color: "#0F6E56" }}>
+        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#154c72", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, color: "#ffffff" }}>
           {initials(me.name)}
         </div>
-        <button onClick={onLogout} style={{ fontSize: 11, padding: "4px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+        <button onClick={onLogout} style={{ fontSize: 11, padding: "4px 10px", border: "1px solid #0b2839", borderRadius: 8, cursor: "pointer", background: "transparent", color: "#99bbd3" }}>
           Sign out
         </button>
       </div>
@@ -566,11 +568,14 @@ function Topbar({ me, onLogout }) {
 // ─── SIDEBAR ────────────────────────────────────────────────────────────────
 function Sidebar({ items, active, onNav }) {
   return (
-    <div style={{ width: 170, borderRight: "0.5px solid var(--color-border-tertiary)", padding: "12px 0", flexShrink: 0, background: "var(--color-background-primary)" }}>
+    <div style={{ width: 170, borderRight: "1px solid #0b2839", padding: "12px 8px", flexShrink: 0, background: "#071a26" }}>
       {items.map(({ id, label, icon, section }) => section
-        ? <div key={id} style={{ fontSize: 10, fontWeight: 500, color: "var(--color-text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", padding: "10px 14px 4px" }}>{label}</div>
+        ? <div key={id} style={{ fontSize: 10, fontWeight: 500, color: "#3377a7", textTransform: "uppercase", letterSpacing: "0.06em", padding: "10px 6px 4px" }}>{label}</div>
         : <div key={id} onClick={() => onNav(id)}
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 14px", fontSize: 13, cursor: "pointer", color: active === id ? "#0F6E56" : "var(--color-text-secondary)", background: active === id ? "#E1F5EE" : "transparent", fontWeight: active === id ? 500 : 400 }}>
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", fontSize: 13, cursor: "pointer", borderRadius: 8, marginBottom: 2,
+                     color: active === id ? "#ffffff" : "#99bbd3",
+                     background: active === id ? "#154c72" : "transparent",
+                     fontWeight: active === id ? 500 : 400 }}>
             <i className={`ti ${icon}`} style={{ fontSize: 16 }} aria-hidden="true" />{label}
           </div>
       )}
@@ -589,7 +594,7 @@ function CandidateLayout({ me, onLogout, page, setPage, attempts, userPathways, 
   const myUP = Object.values(userPathways).filter(up => up.userId === me.id);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: 600, border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: 600, border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)" }}>
       <Topbar me={me} onLogout={onLogout} />
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
         <Sidebar items={navItems} active={page} onNav={setPage} />
@@ -617,9 +622,9 @@ function CandidateDash({ me, myUP, attempts, onNav }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 20 }}>
         {[
           { n: myUP.length, l: "Pathways assigned" },
-          { n: achieved, l: "Readiness achieved", c: "#0F6E56" },
+          { n: achieved, l: "Readiness achieved", c: "#103a56" },
           { n: attempts.length, l: "Total attempts" },
-          { n: avg != null ? avg + "%" : "-", l: "Average score", c: avg != null ? (avg >= 80 ? "#0F6E56" : "#BA7517") : undefined },
+          { n: avg != null ? avg + "%" : "-", l: "Average score", c: avg != null ? (avg >= 80 ? "#103a56" : "#BA7517") : undefined },
         ].map((s, i) => (
           <div key={i} style={{ background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: 12 }}>
             <div style={{ fontSize: 22, fontWeight: 500, color: s.c || "var(--color-text-primary)" }}>{s.n}</div>
@@ -628,9 +633,9 @@ function CandidateDash({ me, myUP, attempts, onNav }) {
         ))}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
+        <div style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-            <i className="ti ti-book-2" style={{ color: "#1D9E75", fontSize: 15 }} aria-hidden="true" />My pathways
+            <i className="ti ti-book-2" style={{ color: "#1a5f8f", fontSize: 15 }} aria-hidden="true" />My pathways
           </div>
           {myUP.length === 0
             ? <div style={{ textAlign: "center", padding: "24px 0", color: "var(--color-text-tertiary)", fontSize: 12 }}>No pathways assigned yet. Wait for admin approval.</div>
@@ -644,13 +649,13 @@ function CandidateDash({ me, myUP, attempts, onNav }) {
               </div>
             ))
           }
-          <button onClick={() => onNav("pathways")} style={{ marginTop: 10, fontSize: 11, padding: "4px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+          <button onClick={() => onNav("pathways")} style={{ marginTop: 10, fontSize: 11, padding: "4px 10px", border: "1px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
             View all <i className="ti ti-arrow-right" style={{ fontSize: 11 }} aria-hidden="true" />
           </button>
         </div>
-        <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
+        <div style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-            <i className="ti ti-trending-up" style={{ color: "#1D9E75", fontSize: 15 }} aria-hidden="true" />Recent attempts
+            <i className="ti ti-trending-up" style={{ color: "#1a5f8f", fontSize: 15 }} aria-hidden="true" />Recent attempts
           </div>
           {attempts.length === 0
             ? <div style={{ textAlign: "center", padding: "24px 0", color: "var(--color-text-tertiary)", fontSize: 12 }}>No attempts yet. Start a pathway to begin.</div>
@@ -660,15 +665,15 @@ function CandidateDash({ me, myUP, attempts, onNav }) {
                   <div style={{ fontSize: 12, fontWeight: 500 }}>{PATHWAYS.find(p => p.id === a.pathwayId)?.name}</div>
                   <div style={{ fontSize: 11, color: "var(--color-text-secondary)" }}>{new Date(a.completedAt).toLocaleDateString()}</div>
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 500, color: a.score >= 80 ? "#0F6E56" : a.score >= 65 ? "#BA7517" : "#993C1D" }}>{a.score}%</div>
+                <div style={{ fontSize: 15, fontWeight: 500, color: a.score >= 80 ? "#103a56" : a.score >= 65 ? "#BA7517" : "#993C1D" }}>{a.score}%</div>
               </div>
             ))
           }
         </div>
       </div>
-      <div style={{ background: "#E1F5EE", border: "0.5px solid #9FE1CB", borderRadius: "var(--border-radius-md)", padding: "10px 14px", display: "flex", alignItems: "flex-start", gap: 10, marginTop: 16 }}>
-        <i className="ti ti-trophy" style={{ color: "#0F6E56", fontSize: 16, marginTop: 1, flexShrink: 0 }} aria-hidden="true" />
-        <div style={{ fontSize: 12, color: "#085041", lineHeight: 1.55 }}>
+      <div style={{ background: "#eef3f8", border: "1px solid #99bbd3", borderRadius: "var(--border-radius-md)", padding: "10px 14px", display: "flex", alignItems: "flex-start", gap: 10, marginTop: 16 }}>
+        <i className="ti ti-trophy" style={{ color: "#103a56", fontSize: 16, marginTop: 1, flexShrink: 0 }} aria-hidden="true" />
+        <div style={{ fontSize: 12, color: "#0b2839", lineHeight: 1.55 }}>
           <strong>Readiness score required: 80%</strong><br />
           Scoring 80% or above grants Readiness Achieved status. Below 80% is recorded as Additional Preparation Recommended.
         </div>
@@ -684,7 +689,7 @@ function CandidatePathways({ myUP, attempts, onStart }) {
         <div style={{ fontSize: 18, fontWeight: 500 }}>Readiness pathways</div>
         <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginTop: 3 }}>Complete each pathway to demonstrate laboratory readiness</div>
       </div>
-      <div style={{ textAlign: "center", padding: "48px 20px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
+      <div style={{ textAlign: "center", padding: "48px 20px", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
         <i className="ti ti-lock" style={{ fontSize: 32, display: "block", marginBottom: 8 }} aria-hidden="true" />
         <div style={{ fontSize: 14, fontWeight: 500 }}>No pathways assigned</div>
         <div style={{ fontSize: 12, marginTop: 4 }}>Your account is pending approval. An administrator will assign pathways once approved.</div>
@@ -702,9 +707,9 @@ function CandidatePathways({ myUP, attempts, onStart }) {
         if (!up) return null;
         const myAttempts = attempts.filter(a => a.pathwayId === pw.id);
         return (
-          <div key={pw.id} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16, marginBottom: 12 }}>
+          <div key={pw.id} style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: up.status === "achieved" ? "#E1F5EE" : "#E6F1FB", color: up.status === "achieved" ? "#0F6E56" : "#185FA5", fontSize: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: up.status === "achieved" ? "#eef3f8" : "#E6F1FB", color: up.status === "achieved" ? "#103a56" : "#185FA5", fontSize: 16 }}>
                 <i className={`ti ${up.status === "achieved" ? "ti-circle-check" : "ti-book-2"}`} aria-hidden="true" />
               </div>
               <div style={{ flex: 1 }}>
@@ -719,9 +724,9 @@ function CandidatePathways({ myUP, attempts, onStart }) {
                   <span>{pw.time} min limit</span>
                   <span>Pass: {pw.pass}%</span>
                   {up.attempts > 0 && <span>{up.attempts} attempt{up.attempts !== 1 ? "s" : ""}</span>}
-                  {up.bestScore != null && <span style={{ color: up.bestScore >= 80 ? "#0F6E56" : "#BA7517", fontWeight: 500 }}>Best: {up.bestScore}%</span>}
+                  {up.bestScore != null && <span style={{ color: up.bestScore >= 80 ? "#103a56" : "#BA7517", fontWeight: 500 }}>Best: {up.bestScore}%</span>}
                 </div>
-                <button onClick={() => onStart(pw.id)} style={{ fontSize: 12, padding: "6px 14px", border: "0.5px solid #1D9E75", borderRadius: 8, cursor: "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+                <button onClick={() => onStart(pw.id)} style={{ fontSize: 13, padding: "10px 16px", minHeight: 44, border: "1px solid #1a5f8f", borderRadius: 8, cursor: "pointer", background: "#1a5f8f", color: "#fff", fontWeight: 500 }}>
                   {up.status === "achieved" ? "Retake pathway" : up.attempts > 0 ? "Retake pathway" : "Start pathway"}
                   <i className="ti ti-arrow-right" style={{ fontSize: 12, marginLeft: 5 }} aria-hidden="true" />
                 </button>
@@ -742,7 +747,7 @@ function CandidateHistory({ attempts }) {
         <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginTop: 3 }}>All your past assessment attempts</div>
       </div>
       {attempts.length === 0
-        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
+        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
             <i className="ti ti-history" style={{ fontSize: 32, display: "block", marginBottom: 8 }} aria-hidden="true" />
             <div style={{ fontSize: 13 }}>No attempts yet</div>
           </div>
@@ -751,13 +756,13 @@ function CandidateHistory({ attempts }) {
           const cats = {};
           a.detail?.forEach(d => { if (!cats[d.cat]) cats[d.cat] = { c: 0, t: 0 }; cats[d.cat].t++; if (d.isCorrect) cats[d.cat].c++; });
           return (
-            <div key={a.id} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16, marginBottom: 10 }}>
+            <div key={a.id} style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16, marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500 }}>{pw?.name}</div>
                   <div style={{ fontSize: 11, color: "var(--color-text-secondary)" }}>{new Date(a.completedAt).toLocaleString()} · {a.correct}/{a.total} correct</div>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 500, color: a.score >= 80 ? "#0F6E56" : a.score >= 65 ? "#BA7517" : "#993C1D" }}>{a.score}%</div>
+                <div style={{ fontSize: 22, fontWeight: 500, color: a.score >= 80 ? "#103a56" : a.score >= 65 ? "#BA7517" : "#993C1D" }}>{a.score}%</div>
                 <div style={{ marginLeft: 10 }}>
                   <UPBadge status={a.passed ? "achieved" : "prep_recommended"} />
                 </div>
@@ -766,9 +771,9 @@ function CandidateHistory({ attempts }) {
                 {Object.entries(cats).map(([cat, v]) => (
                   <div key={cat} style={{ background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: "8px 10px" }}>
                     <div style={{ fontSize: 10, color: "var(--color-text-secondary)", marginBottom: 3, lineHeight: 1.3 }}>{cat}</div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: Math.round(v.c / v.t * 100) >= 80 ? "#0F6E56" : "#BA7517" }}>{Math.round(v.c / v.t * 100)}%</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: Math.round(v.c / v.t * 100) >= 80 ? "#103a56" : "#BA7517" }}>{Math.round(v.c / v.t * 100)}%</div>
                     <div style={{ height: 3, background: "var(--color-border-tertiary)", borderRadius: 2, marginTop: 4 }}>
-                      <div style={{ height: 3, width: Math.round(v.c / v.t * 100) + "%", background: Math.round(v.c / v.t * 100) >= 80 ? "#1D9E75" : "#EF9F27", borderRadius: 2 }} />
+                      <div style={{ height: 3, width: Math.round(v.c / v.t * 100) + "%", background: Math.round(v.c / v.t * 100) >= 80 ? "#1a5f8f" : "#EF9F27", borderRadius: 2 }} />
                     </div>
                   </div>
                 ))}
@@ -816,8 +821,8 @@ function Quiz({ quizData, setQuizData, onSubmit, onExit }) {
   const timerWarn = localTimer < 180;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)" }}>
-      <div style={{ padding: "10px 16px", borderBottom: "0.5px solid var(--color-border-tertiary)", background: "var(--color-background-primary)" }}>
+    <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)" }}>
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--color-border-tertiary)", background: "var(--color-background-primary)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
           <span style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)" }}>{pw.name}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: timerWarn ? "#A32D2D" : "var(--color-text-primary)", background: timerWarn ? "#FCEBEB" : "var(--color-background-secondary)", padding: "3px 10px", borderRadius: 20 }}>
@@ -826,17 +831,17 @@ function Quiz({ quizData, setQuizData, onSubmit, onExit }) {
           <span style={{ fontSize: 11, color: "var(--color-text-secondary)" }}>Q{idx + 1} / {qs.length} · {answeredCount} answered</span>
         </div>
         <div style={{ height: 4, background: "var(--color-background-secondary)", borderRadius: 2 }}>
-          <div style={{ height: 4, width: pct + "%", background: "#1D9E75", borderRadius: 2, transition: "width 0.3s" }} />
+          <div style={{ height: 4, width: pct + "%", background: "#1a5f8f", borderRadius: 2, transition: "width 0.3s" }} />
         </div>
       </div>
 
       <div style={{ padding: 20, flex: 1 }}>
-        <div style={{ fontSize: 11, color: "#1D9E75", fontWeight: 500, marginBottom: 6 }}>{q.cat} · {q.diff}</div>
+        <div style={{ fontSize: 11, color: "#1a5f8f", fontWeight: 500, marginBottom: 6 }}>{q.cat} · {q.diff}</div>
         <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.6, marginBottom: 16 }}>{q.q}</div>
         {q.shuffledOpts.map((opt) => (
           <div key={opt.origIdx} onClick={() => select(opt.origIdx)}
-            style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", border: chosen === opt.origIdx ? "1.5px solid #1D9E75" : "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-md)", marginBottom: 8, cursor: "pointer", background: chosen === opt.origIdx ? "#E1F5EE" : "var(--color-background-primary)", fontSize: 13, color: chosen === opt.origIdx ? "#085041" : "var(--color-text-primary)", transition: "all 0.1s" }}>
-            <div style={{ width: 20, height: 20, borderRadius: "50%", border: chosen === opt.origIdx ? "2px solid #1D9E75" : "1.5px solid var(--color-border-secondary)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: chosen === opt.origIdx ? "#1D9E75" : "transparent" }}>
+            style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", border: chosen === opt.origIdx ? "1.5px solid #1a5f8f" : "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-md)", marginBottom: 8, cursor: "pointer", background: chosen === opt.origIdx ? "#eef3f8" : "var(--color-background-primary)", fontSize: 13, color: chosen === opt.origIdx ? "#0b2839" : "var(--color-text-primary)", transition: "all 0.1s" }}>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", border: chosen === opt.origIdx ? "2px solid #1a5f8f" : "1.5px solid var(--color-border-secondary)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: chosen === opt.origIdx ? "#1a5f8f" : "transparent" }}>
               {chosen === opt.origIdx && <i className="ti ti-check" style={{ fontSize: 10, color: "#fff" }} aria-hidden="true" />}
             </div>
             {opt.text}
@@ -844,39 +849,39 @@ function Quiz({ quizData, setQuizData, onSubmit, onExit }) {
         ))}
       </div>
 
-      <div style={{ padding: "10px 20px", borderTop: "0.5px solid var(--color-border-tertiary)", display: "flex", flexWrap: "wrap", gap: 5 }}>
+      <div style={{ padding: "10px 20px", borderTop: "1px solid var(--color-border-tertiary)", display: "flex", flexWrap: "wrap", gap: 5 }}>
         {qs.map((qq, i) => (
           <button key={i} onClick={() => goTo(i)}
-            style={{ width: 28, height: 28, borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer", border: "none", background: i === idx ? "#1D9E75" : answers[qq.id] != null ? "#E1F5EE" : "var(--color-background-secondary)", color: i === idx ? "#fff" : answers[qq.id] != null ? "#0F6E56" : "var(--color-text-secondary)" }}>
+            style={{ width: 28, height: 28, borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer", border: "none", background: i === idx ? "#1a5f8f" : answers[qq.id] != null ? "#eef3f8" : "var(--color-background-secondary)", color: i === idx ? "#fff" : answers[qq.id] != null ? "#103a56" : "var(--color-text-secondary)" }}>
             {i + 1}
           </button>
         ))}
       </div>
 
-      <div style={{ padding: "10px 20px", borderTop: "0.5px solid var(--color-border-tertiary)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--color-background-primary)" }}>
+      <div style={{ padding: "10px 20px", borderTop: "1px solid var(--color-border-tertiary)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--color-background-primary)" }}>
         <div style={{ display: "flex", gap: 8 }}>
           {!confirmExit
-            ? <button onClick={() => setConfirmExit(true)} style={{ fontSize: 12, padding: "6px 12px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+            ? <button onClick={() => setConfirmExit(true)} style={{ fontSize: 12, padding: "6px 12px", border: "1px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
                 <i className="ti ti-x" style={{ fontSize: 12 }} aria-hidden="true" /> Exit
               </button>
             : <>
                 <span style={{ fontSize: 12, color: "var(--color-text-secondary)", alignSelf: "center" }}>Exit and lose progress?</span>
-                <button onClick={onExit} style={{ fontSize: 12, padding: "5px 10px", border: "0.5px solid #E24B4A", borderRadius: 8, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D" }}>Yes, exit</button>
-                <button onClick={() => setConfirmExit(false)} style={{ fontSize: 12, padding: "5px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>Cancel</button>
+                <button onClick={onExit} style={{ fontSize: 12, padding: "5px 10px", border: "1px solid #E24B4A", borderRadius: 8, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D" }}>Yes, exit</button>
+                <button onClick={() => setConfirmExit(false)} style={{ fontSize: 12, padding: "5px 10px", border: "1px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>Cancel</button>
               </>
           }
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={() => goTo(Math.max(0, idx - 1))} disabled={idx === 0}
-            style={{ fontSize: 12, padding: "6px 12px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: idx === 0 ? "default" : "pointer", background: "transparent", color: "var(--color-text-secondary)", opacity: idx === 0 ? 0.4 : 1 }}>
+            style={{ fontSize: 12, padding: "6px 12px", border: "1px solid var(--color-border-secondary)", borderRadius: 8, cursor: idx === 0 ? "default" : "pointer", background: "transparent", color: "var(--color-text-secondary)", opacity: idx === 0 ? 0.4 : 1 }}>
             <i className="ti ti-arrow-left" style={{ fontSize: 12 }} aria-hidden="true" /> Prev
           </button>
           {idx < qs.length - 1
-            ? <button onClick={() => goTo(idx + 1)} style={{ fontSize: 12, padding: "6px 14px", border: "none", borderRadius: 8, cursor: "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+            ? <button onClick={() => goTo(idx + 1)} style={{ fontSize: 13, padding: "10px 16px", minHeight: 44, border: "none", borderRadius: 8, cursor: "pointer", background: "#1a5f8f", color: "#fff", fontWeight: 500 }}>
                 Next <i className="ti ti-arrow-right" style={{ fontSize: 12 }} aria-hidden="true" />
               </button>
             : <button onClick={() => { clearInterval(timerRef.current); onSubmit(answers, qs, pw.id); }}
-                style={{ fontSize: 12, padding: "6px 16px", border: "none", borderRadius: 8, cursor: "pointer", background: "#0F6E56", color: "#fff", fontWeight: 500 }}>
+                style={{ fontSize: 13, padding: "10px 16px", minHeight: 44, border: "none", borderRadius: 8, cursor: "pointer", background: "#103a56", color: "#fff", fontWeight: 500 }}>
                 <i className="ti ti-flag" style={{ fontSize: 12 }} aria-hidden="true" /> Submit ({answeredCount}/{qs.length})
               </button>
           }
@@ -896,11 +901,11 @@ function Result({ result, pw, onBack, onRetake }) {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)", padding: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)", padding: 24 }}>
       <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
-        <div style={{ width: 100, height: 100, borderRadius: "50%", margin: "0 auto 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: result.passed ? "#E1F5EE" : "#FAECE7", border: `2px solid ${result.passed ? "#5DCAA5" : "#F0997B"}` }}>
-          <div style={{ fontSize: 28, fontWeight: 500, color: result.passed ? "#0F6E56" : "#993C1D" }}>{result.score}%</div>
-          <div style={{ fontSize: 10, color: result.passed ? "#0F6E56" : "#993C1D" }}>{result.passed ? "Pass" : "Below pass"}</div>
+        <div style={{ width: 100, height: 100, borderRadius: "50%", margin: "0 auto 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: result.passed ? "#eef3f8" : "#FAECE7", border: `2px solid ${result.passed ? "#3377a7" : "#F0997B"}` }}>
+          <div style={{ fontSize: 28, fontWeight: 500, color: result.passed ? "#103a56" : "#993C1D" }}>{result.score}%</div>
+          <div style={{ fontSize: 10, color: result.passed ? "#103a56" : "#993C1D" }}>{result.passed ? "Pass" : "Below pass"}</div>
         </div>
         <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>{result.passed ? "Readiness Achieved" : "Additional Preparation Recommended"}</div>
         <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 20, lineHeight: 1.55 }}>
@@ -914,9 +919,9 @@ function Result({ result, pw, onBack, onRetake }) {
             return (
               <div key={cat} style={{ background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: "10px 12px" }}>
                 <div style={{ fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 4, lineHeight: 1.3 }}>{cat}</div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: pct >= 80 ? "#0F6E56" : pct >= 65 ? "#BA7517" : "#993C1D" }}>{pct}%</div>
+                <div style={{ fontSize: 14, fontWeight: 500, color: pct >= 80 ? "#103a56" : pct >= 65 ? "#BA7517" : "#993C1D" }}>{pct}%</div>
                 <div style={{ height: 3, background: "var(--color-border-tertiary)", borderRadius: 2, marginTop: 5 }}>
-                  <div style={{ height: 3, width: pct + "%", background: pct >= 80 ? "#1D9E75" : pct >= 65 ? "#EF9F27" : "#E24B4A", borderRadius: 2 }} />
+                  <div style={{ height: 3, width: pct + "%", background: pct >= 80 ? "#1a5f8f" : pct >= 65 ? "#EF9F27" : "#E24B4A", borderRadius: 2 }} />
                 </div>
                 <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 3 }}>{v.c}/{v.t} correct</div>
               </div>
@@ -924,10 +929,10 @@ function Result({ result, pw, onBack, onRetake }) {
           })}
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-          <button onClick={onBack} style={{ fontSize: 12, padding: "7px 14px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+          <button onClick={onBack} style={{ fontSize: 12, padding: "7px 14px", border: "1px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
             <i className="ti ti-arrow-left" style={{ fontSize: 12 }} aria-hidden="true" /> Dashboard
           </button>
-          <button onClick={onRetake} style={{ fontSize: 12, padding: "7px 16px", border: "none", borderRadius: 8, cursor: "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+          <button onClick={onRetake} style={{ fontSize: 13, padding: "10px 16px", minHeight: 44, border: "none", borderRadius: 8, cursor: "pointer", background: "#1a5f8f", color: "#fff", fontWeight: 500 }}>
             <i className="ti ti-refresh" style={{ fontSize: 12 }} aria-hidden="true" /> Retake pathway
           </button>
         </div>
@@ -948,7 +953,7 @@ function AdminLayout({ me, onLogout, page, setPage, users, attempts, userPathway
   const curPage = page.startsWith("admin") ? page : "admin_dash";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: 600, border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: 600, border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", overflow: "hidden", background: "var(--color-background-primary)" }}>
       <Topbar me={me} onLogout={onLogout} />
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
         <Sidebar items={navItems} active={curPage} onNav={setPage} />
@@ -980,7 +985,7 @@ function AdminDash({ users, attempts, userPathways, onApprove, onReject, reload 
           { n: candidates.length, l: "Total candidates" },
           { n: pending.length, l: "Pending approval", c: pending.length > 0 ? "#BA7517" : undefined },
           { n: completed.length, l: "Total attempts" },
-          { n: passRate + "%", l: "Pass rate", c: passRate >= 70 ? "#0F6E56" : "#BA7517" },
+          { n: passRate + "%", l: "Pass rate", c: passRate >= 70 ? "#103a56" : "#BA7517" },
         ].map((s, i) => (
           <div key={i} style={{ background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: 12 }}>
             <div style={{ fontSize: 22, fontWeight: 500, color: s.c || "var(--color-text-primary)" }}>{s.n}</div>
@@ -989,24 +994,24 @@ function AdminDash({ users, attempts, userPathways, onApprove, onReject, reload 
         ))}
       </div>
       {pending.length > 0 && (
-        <div style={{ background: "#FAEEDA", border: "0.5px solid #FAC775", borderRadius: "var(--border-radius-md)", padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ background: "#FAEEDA", border: "1px solid #FAC775", borderRadius: "var(--border-radius-md)", padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
           <i className="ti ti-alert-triangle" style={{ color: "#BA7517", fontSize: 16 }} aria-hidden="true" />
           <div style={{ flex: 1, fontSize: 12, color: "#633806" }}>{pending.length} candidate{pending.length !== 1 ? "s" : ""} awaiting approval</div>
           <div style={{ display: "flex", gap: 8 }}>
             {pending.map(u => (
-              <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-md)", padding: "4px 10px" }}>
+              <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-md)", padding: "4px 10px" }}>
                 <span style={{ fontSize: 12, color: "var(--color-text-primary)" }}>{u.name}</span>
-                <button onClick={() => { onApprove(u.id); reload(); }} style={{ fontSize: 11, padding: "2px 8px", border: "0.5px solid #9FE1CB", borderRadius: 6, cursor: "pointer", background: "#E1F5EE", color: "#0F6E56" }}>Approve</button>
-                <button onClick={() => { onReject(u.id); reload(); }} style={{ fontSize: 11, padding: "2px 8px", border: "0.5px solid #F5C4B3", borderRadius: 6, cursor: "pointer", background: "#FAECE7", color: "#993C1D" }}>Reject</button>
+                <button onClick={() => { onApprove(u.id); reload(); }} style={{ fontSize: 11, padding: "2px 8px", border: "1px solid #99bbd3", borderRadius: 6, cursor: "pointer", background: "#eef3f8", color: "#103a56" }}>Approve</button>
+                <button onClick={() => { onReject(u.id); reload(); }} style={{ fontSize: 11, padding: "2px 8px", border: "1px solid #F5C4B3", borderRadius: 6, cursor: "pointer", background: "#FAECE7", color: "#993C1D" }}>Reject</button>
               </div>
             ))}
           </div>
         </div>
       )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
+        <div style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <i className="ti ti-chart-bar" style={{ color: "#1D9E75", fontSize: 15 }} aria-hidden="true" />Pass rate by pathway
+            <i className="ti ti-chart-bar" style={{ color: "#1a5f8f", fontSize: 15 }} aria-hidden="true" />Pass rate by pathway
           </div>
           {PATHWAYS.map(pw => {
             const pwAttempts = completed.filter(a => a.pathwayId === pw.id);
@@ -1015,16 +1020,16 @@ function AdminDash({ users, attempts, userPathways, onApprove, onReject, reload 
               <div key={pw.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <div style={{ fontSize: 12, color: "var(--color-text-secondary)", width: 140, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pw.name.replace(" Readiness", "")}</div>
                 <div style={{ flex: 1, height: 6, background: "var(--color-background-secondary)", borderRadius: 3 }}>
-                  {pct != null && <div style={{ height: 6, width: pct + "%", background: pct >= 80 ? "#1D9E75" : pct >= 65 ? "#EF9F27" : "#E24B4A", borderRadius: 3 }} />}
+                  {pct != null && <div style={{ height: 6, width: pct + "%", background: pct >= 80 ? "#1a5f8f" : pct >= 65 ? "#EF9F27" : "#E24B4A", borderRadius: 3 }} />}
                 </div>
                 <div style={{ fontSize: 11, color: "var(--color-text-secondary)", width: 36, textAlign: "right" }}>{pct != null ? pct + "%" : "-"}</div>
               </div>
             );
           })}
         </div>
-        <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
+        <div style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <i className="ti ti-clock" style={{ color: "#1D9E75", fontSize: 15 }} aria-hidden="true" />Recent attempts
+            <i className="ti ti-clock" style={{ color: "#1a5f8f", fontSize: 15 }} aria-hidden="true" />Recent attempts
           </div>
           {completed.length === 0
             ? <div style={{ textAlign: "center", padding: "20px 0", fontSize: 12, color: "var(--color-text-tertiary)" }}>No attempts yet</div>
@@ -1032,12 +1037,12 @@ function AdminDash({ users, attempts, userPathways, onApprove, onReject, reload 
               const u = users[a.userId];
               return (
                 <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", marginBottom: 5 }}>
-                  <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#E1F5EE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 500, color: "#0F6E56", flexShrink: 0 }}>{u ? initials(u.name) : "?"}</div>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#eef3f8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 500, color: "#103a56", flexShrink: 0 }}>{u ? initials(u.name) : "?"}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u?.name || "Unknown"}</div>
                     <div style={{ fontSize: 10, color: "var(--color-text-secondary)" }}>{new Date(a.completedAt).toLocaleDateString()}</div>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: a.score >= 80 ? "#0F6E56" : a.score >= 65 ? "#BA7517" : "#993C1D" }}>{a.score}%</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: a.score >= 80 ? "#103a56" : a.score >= 65 ? "#BA7517" : "#993C1D" }}>{a.score}%</div>
                 </div>
               );
             })
@@ -1063,20 +1068,20 @@ function AdminUsers({ users, attempts, userPathways, onApprove, onReject, onDele
       <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
         {[["all", "All"], ["pending_approval", "Pending"], ["approved", "Approved"], ["rejected", "Rejected"], ["suspended", "Suspended"]].map(([v, l]) => (
           <button key={v} onClick={() => setFilter(v)}
-            style={{ fontSize: 12, padding: "5px 12px", border: `0.5px solid ${filter === v ? "#1D9E75" : "var(--color-border-secondary)"}`, borderRadius: 20, cursor: "pointer", background: filter === v ? "#E1F5EE" : "transparent", color: filter === v ? "#0F6E56" : "var(--color-text-secondary)", fontWeight: filter === v ? 500 : 400 }}>
+            style={{ fontSize: 12, padding: "5px 12px", border: `1px solid ${filter === v ? "#1a5f8f" : "var(--color-border-secondary)"}`, borderRadius: 20, cursor: "pointer", background: filter === v ? "#eef3f8" : "transparent", color: filter === v ? "#103a56" : "var(--color-text-secondary)", fontWeight: filter === v ? 500 : 400 }}>
             {l}
           </button>
         ))}
       </div>
       {filtered.length === 0
-        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)", fontSize: 13 }}>No users in this category</div>
+        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)", fontSize: 13 }}>No users in this category</div>
         : filtered.map(u => {
           const uAttempts = attempts.filter(a => a.userId === u.id);
           const up = Object.values(userPathways).filter(p => p.userId === u.id);
           return (
-            <div key={u.id} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 14, marginBottom: 8 }}>
+            <div key={u.id} style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 14, marginBottom: 8 }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#E1F5EE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, color: "#0F6E56", flexShrink: 0 }}>{initials(u.name)}</div>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#eef3f8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, color: "#103a56", flexShrink: 0 }}>{initials(u.name)}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
                     <span style={{ fontSize: 13, fontWeight: 500 }}>{u.name}</span>
@@ -1091,10 +1096,10 @@ function AdminUsers({ users, attempts, userPathways, onApprove, onReject, onDele
                 </div>
                 {u.status === "pending_approval" && (
                   <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                    <button onClick={() => { onApprove(u.id); reload(); }} style={{ fontSize: 11, padding: "5px 10px", border: "0.5px solid #9FE1CB", borderRadius: 7, cursor: "pointer", background: "#E1F5EE", color: "#0F6E56", fontWeight: 500 }}>
+                    <button onClick={() => { onApprove(u.id); reload(); }} style={{ fontSize: 11, padding: "5px 10px", border: "1px solid #99bbd3", borderRadius: 7, cursor: "pointer", background: "#eef3f8", color: "#103a56", fontWeight: 500 }}>
                       <i className="ti ti-check" style={{ fontSize: 11 }} aria-hidden="true" /> Approve
                     </button>
-                    <button onClick={() => { onReject(u.id); reload(); }} style={{ fontSize: 11, padding: "5px 10px", border: "0.5px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "#FAECE7", color: "#993C1D", fontWeight: 500 }}>
+                    <button onClick={() => { onReject(u.id); reload(); }} style={{ fontSize: 11, padding: "5px 10px", border: "1px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "#FAECE7", color: "#993C1D", fontWeight: 500 }}>
                       <i className="ti ti-x" style={{ fontSize: 11 }} aria-hidden="true" /> Reject
                     </button>
                   </div>
@@ -1102,10 +1107,10 @@ function AdminUsers({ users, attempts, userPathways, onApprove, onReject, onDele
                 {confirmDelete === u.id
                   ? <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0, marginLeft: 6 }}>
                       <span style={{ fontSize: 11, color: "#993C1D" }}>Delete permanently?</span>
-                      <button onClick={() => { onDelete(u.id); setConfirmDelete(null); }} style={{ fontSize: 11, padding: "4px 8px", border: "0.5px solid #E24B4A", borderRadius: 6, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D", fontWeight: 500 }}>Yes</button>
-                      <button onClick={() => setConfirmDelete(null)} style={{ fontSize: 11, padding: "4px 8px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 6, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>No</button>
+                      <button onClick={() => { onDelete(u.id); setConfirmDelete(null); }} style={{ fontSize: 11, padding: "4px 8px", border: "1px solid #E24B4A", borderRadius: 6, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D", fontWeight: 500 }}>Yes</button>
+                      <button onClick={() => setConfirmDelete(null)} style={{ fontSize: 11, padding: "4px 8px", border: "1px solid var(--color-border-secondary)", borderRadius: 6, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>No</button>
                     </div>
-                  : <button onClick={() => setConfirmDelete(u.id)} style={{ fontSize: 11, padding: "5px 8px", border: "0.5px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "transparent", color: "#993C1D", marginLeft: 6, flexShrink: 0 }}>
+                  : <button onClick={() => setConfirmDelete(u.id)} style={{ fontSize: 11, padding: "5px 8px", border: "1px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "transparent", color: "#993C1D", marginLeft: 6, flexShrink: 0 }}>
                       <i className="ti ti-trash" style={{ fontSize: 11 }} /> Delete
                     </button>
                 }
@@ -1128,7 +1133,7 @@ function AdminProgress({ users, attempts, userPathways }) {
         <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginTop: 3 }}>Live progress tracking for all approved candidates</div>
       </div>
       {candidates.length === 0
-        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
+        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
             <i className="ti ti-users" style={{ fontSize: 32, display: "block", marginBottom: 8 }} aria-hidden="true" />
             <div style={{ fontSize: 13 }}>No approved candidates yet. Approve registrations to see progress here.</div>
           </div>
@@ -1148,15 +1153,15 @@ function AdminProgress({ users, attempts, userPathways }) {
           });
 
           return (
-            <div key={u.id} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16, marginBottom: 10 }}>
+            <div key={u.id} style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 16, marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#E1F5EE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, color: "#0F6E56", flexShrink: 0 }}>{initials(u.name)}</div>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#eef3f8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, color: "#103a56", flexShrink: 0 }}>{initials(u.name)}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500 }}>{u.name}</div>
                   <div style={{ fontSize: 11, color: "var(--color-text-secondary)" }}>{u.institution} · {u.position}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 20, fontWeight: 500, color: best != null ? (best >= 80 ? "#0F6E56" : best >= 65 ? "#BA7517" : "#993C1D") : "var(--color-text-tertiary)" }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: best != null ? (best >= 80 ? "#103a56" : best >= 65 ? "#BA7517" : "#993C1D") : "var(--color-text-tertiary)" }}>
                     {best != null ? best + "%" : "-"}
                   </div>
                   <div style={{ fontSize: 10, color: "var(--color-text-secondary)" }}>Best score</div>
@@ -1186,9 +1191,9 @@ function AdminProgress({ users, attempts, userPathways }) {
                       return (
                         <div key={cat} style={{ background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: "7px 9px" }}>
                           <div style={{ fontSize: 10, color: "var(--color-text-secondary)", lineHeight: 1.3, marginBottom: 3 }}>{cat}</div>
-                          <div style={{ fontSize: 12, fontWeight: 500, color: pct >= 80 ? "#0F6E56" : pct >= 65 ? "#BA7517" : "#993C1D" }}>{pct}%</div>
+                          <div style={{ fontSize: 12, fontWeight: 500, color: pct >= 80 ? "#103a56" : pct >= 65 ? "#BA7517" : "#993C1D" }}>{pct}%</div>
                           <div style={{ height: 3, background: "var(--color-border-tertiary)", borderRadius: 2, marginTop: 3 }}>
-                            <div style={{ height: 3, width: pct + "%", background: pct >= 80 ? "#1D9E75" : pct >= 65 ? "#EF9F27" : "#E24B4A", borderRadius: 2 }} />
+                            <div style={{ height: 3, width: pct + "%", background: pct >= 80 ? "#1a5f8f" : pct >= 65 ? "#EF9F27" : "#E24B4A", borderRadius: 2 }} />
                           </div>
                         </div>
                       );
@@ -1198,7 +1203,7 @@ function AdminProgress({ users, attempts, userPathways }) {
               )}
 
               {uAttempts.length === 0 && (
-                <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", padding: "8px 0", borderTop: "0.5px solid var(--color-border-tertiary)", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", padding: "8px 0", borderTop: "1px solid var(--color-border-tertiary)", marginTop: 4 }}>
                   No attempts yet - pathway assigned and waiting to start
                 </div>
               )}
@@ -1227,7 +1232,7 @@ function Login({ onLogin, onRegister }) {
   const onKey = (e) => { if (e.key === "Enter") handle(); };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", background: "#0a2e1f" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", background: "#071a26" }}>
       {/* Animated tissue culture background */}
       <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
         {/* Grid pattern */}
@@ -1258,7 +1263,7 @@ function Login({ onLogin, onRegister }) {
       <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: 400, padding: 20 }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(29,158,117,0.2)", border: "1px solid rgba(29,158,117,0.4)", marginBottom: 12 }}>
-            <i className="ti ti-flask" style={{ fontSize: 26, color: "#5DCAA5" }} />
+            <i className="ti ti-flask" style={{ fontSize: 26, color: "#3377a7" }} />
           </div>
           <div style={{ fontSize: 20, fontWeight: 600, color: "#ffffff", marginBottom: 4 }}>Lab Access Readiness</div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>SUZA Seaweed Tissue Culture Laboratory</div>
@@ -1285,13 +1290,13 @@ function Login({ onLogin, onRegister }) {
               </div>
             </div>
             <button onClick={handle} disabled={loading}
-              style={{ width: "100%", padding: "10px 0", background: "linear-gradient(135deg, #1D9E75, #0F6E56)", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 600, cursor: loading ? "wait" : "pointer", letterSpacing: "0.02em" }}>
+              style={{ width: "100%", padding: "10px 0", minHeight: 44, background: "linear-gradient(135deg, #1a5f8f, #103a56)", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 600, cursor: loading ? "wait" : "pointer", letterSpacing: "0.02em" }}>
               {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
           <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
             No account?{" "}
-            <button onClick={onRegister} style={{ background: "none", border: "none", cursor: "pointer", color: "#5DCAA5", fontWeight: 500, fontSize: 12, padding: 0 }}>Register here</button>
+            <button onClick={onRegister} style={{ background: "none", border: "none", cursor: "pointer", color: "#3377a7", fontWeight: 500, fontSize: 12, padding: 0 }}>Register here</button>
           </div>
         </div>
       </div>
@@ -1320,11 +1325,11 @@ function Register({ onRegister, onBack }) {
 
   if (done) return (
     <div style={{ maxWidth: 420, margin: "0 auto", padding: 20 }}>
-      <div style={{ background: "#E1F5EE", border: "0.5px solid #9FE1CB", borderRadius: "var(--border-radius-lg)", padding: 28, textAlign: "center" }}>
-        <i className="ti ti-circle-check" style={{ fontSize: 36, color: "#0F6E56", display: "block", marginBottom: 12 }} aria-hidden="true" />
-        <div style={{ fontSize: 15, fontWeight: 500, color: "#085041", marginBottom: 6 }}>Registration submitted</div>
-        <div style={{ fontSize: 13, color: "#0F6E56", lineHeight: 1.55, marginBottom: 16 }}>Your account is awaiting administrator approval. You will be able to log in and access pathways once approved.</div>
-        <button onClick={onBack} style={{ fontSize: 13, padding: "7px 20px", background: "#1D9E75", border: "none", borderRadius: "var(--border-radius-md)", color: "#fff", cursor: "pointer" }}>Back to sign in</button>
+      <div style={{ background: "#eef3f8", border: "1px solid #99bbd3", borderRadius: "var(--border-radius-lg)", padding: 28, textAlign: "center" }}>
+        <i className="ti ti-circle-check" style={{ fontSize: 36, color: "#103a56", display: "block", marginBottom: 12 }} aria-hidden="true" />
+        <div style={{ fontSize: 15, fontWeight: 500, color: "#0b2839", marginBottom: 6 }}>Registration submitted</div>
+        <div style={{ fontSize: 13, color: "#103a56", lineHeight: 1.55, marginBottom: 16 }}>Your account is awaiting administrator approval. You will be able to log in and access pathways once approved.</div>
+        <button onClick={onBack} style={{ fontSize: 13, padding: "7px 20px", background: "#1a5f8f", border: "none", borderRadius: "var(--border-radius-md)", color: "#fff", cursor: "pointer" }}>Back to sign in</button>
       </div>
     </div>
   );
@@ -1333,38 +1338,38 @@ function Register({ onRegister, onBack }) {
     <div style={{ maxWidth: 480, margin: "0 auto", padding: 20 }}>
       <div style={{ textAlign: "center", marginBottom: 20 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <i className="ti ti-flask" style={{ fontSize: 22, color: "#0F6E56" }} aria-hidden="true" />
+          <i className="ti ti-flask" style={{ fontSize: 22, color: "#103a56" }} aria-hidden="true" />
           <span style={{ fontSize: 15, fontWeight: 500 }}>Lab Access Readiness</span>
         </div>
       </div>
-      <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 24 }}>
+      <div style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 24 }}>
         <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 4 }}>Create account</div>
         <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginBottom: 18 }}>Submit your registration for laboratory access. An administrator will review and approve your account.</div>
-        {err && <div style={{ background: "var(--color-background-danger)", border: "0.5px solid var(--color-border-danger)", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "var(--color-text-danger)", marginBottom: 14 }}>{err}</div>}
+        {err && <div style={{ background: "var(--color-background-danger)", border: "1px solid var(--color-border-danger)", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "var(--color-text-danger)", marginBottom: 14 }}>{err}</div>}
         <div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 12px" }}>
             <div style={{ gridColumn: "1/-1", marginBottom: 12 }}>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Full name<span style={{ color: "#1D9E75" }}>*</span></label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Full name<span style={{ color: "#1a5f8f" }}>*</span></label>
               <input type="text" value={form.name} onChange={e => set("name", e.target.value)} placeholder="Dr. Amina Mwangi" style={{ width: "100%" }} />
             </div>
             <div style={{ gridColumn: "1/-1", marginBottom: 12 }}>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Email address<span style={{ color: "#1D9E75" }}>*</span></label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Email address<span style={{ color: "#1a5f8f" }}>*</span></label>
               <input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="amina@suza.ac.tz" style={{ width: "100%" }} />
             </div>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Password<span style={{ color: "#1D9E75" }}>*</span></label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Password<span style={{ color: "#1a5f8f" }}>*</span></label>
               <input type="password" value={form.password} onChange={e => set("password", e.target.value)} placeholder="Min. 8 characters" style={{ width: "100%" }} />
             </div>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Confirm password<span style={{ color: "#1D9E75" }}>*</span></label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Confirm password<span style={{ color: "#1a5f8f" }}>*</span></label>
               <input type="password" value={form.confirm} onChange={e => set("confirm", e.target.value)} placeholder="Repeat password" style={{ width: "100%" }} />
             </div>
             <div style={{ gridColumn: "1/-1", marginBottom: 12 }}>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Institution / organisation<span style={{ color: "#1D9E75" }}>*</span></label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Institution / organisation<span style={{ color: "#1a5f8f" }}>*</span></label>
               <input type="text" value={form.institution} onChange={e => set("institution", e.target.value)} placeholder="State University of Zanzibar" style={{ width: "100%" }} />
             </div>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Position / title<span style={{ color: "#1D9E75" }}>*</span></label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 5 }}>Position / title<span style={{ color: "#1a5f8f" }}>*</span></label>
               <input type="text" value={form.position} onChange={e => set("position", e.target.value)} placeholder="Research Technician" style={{ width: "100%" }} />
             </div>
             <div style={{ marginBottom: 12 }}>
@@ -1372,13 +1377,13 @@ function Register({ onRegister, onBack }) {
               <input type="text" value={form.department} onChange={e => set("department", e.target.value)} placeholder="Marine Biology" style={{ width: "100%" }} />
             </div>
           </div>
-          <button onClick={handle} disabled={loading} style={{ width: "100%", padding: "9px 0", background: "#1D9E75", border: "none", borderRadius: "var(--border-radius-md)", color: "#fff", fontSize: 13, fontWeight: 500, cursor: loading ? "wait" : "pointer", marginTop: 6 }}>
+          <button onClick={handle} disabled={loading} style={{ width: "100%", padding: "9px 0", minHeight: 44, background: "#1a5f8f", border: "none", borderRadius: "var(--border-radius-md)", color: "#fff", fontSize: 13, fontWeight: 500, cursor: loading ? "wait" : "pointer", marginTop: 6 }}>
             {loading ? "Submitting..." : "Submit registration"}
           </button>
         </div>
         <div style={{ textAlign: "center", marginTop: 14, fontSize: 12, color: "var(--color-text-secondary)" }}>
           Already have an account?{" "}
-          <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "#0F6E56", fontWeight: 500, fontSize: 12, padding: 0 }}>Sign in</button>
+          <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "#103a56", fontWeight: 500, fontSize: 12, padding: 0 }}>Sign in</button>
         </div>
       </div>
     </div>
@@ -1388,7 +1393,7 @@ function Register({ onRegister, onBack }) {
 // ─── SHARED BADGE COMPONENTS ─────────────────────────────────────────────────
 function UPBadge({ status }) {
   const map = {
-    achieved: { bg: "#E1F5EE", color: "#085041", label: "Readiness achieved" },
+    achieved: { bg: "#eef3f8", color: "#0b2839", label: "Readiness achieved" },
     assigned: { bg: "#E6F1FB", color: "#0C447C", label: "Ready to start" },
     in_progress: { bg: "#FAEEDA", color: "#633806", label: "In progress" },
     prep_recommended: { bg: "#FAECE7", color: "#712B13", label: "Prep recommended" },
@@ -1400,7 +1405,7 @@ function UPBadge({ status }) {
 
 function UStatusBadge({ status }) {
   const map = {
-    approved: { bg: "#E1F5EE", color: "#085041", label: "Approved" },
+    approved: { bg: "#eef3f8", color: "#0b2839", label: "Approved" },
     pending_approval: { bg: "#FAEEDA", color: "#633806", label: "Pending approval" },
     pending_verification: { bg: "#E6F1FB", color: "#0C447C", label: "Pending verification" },
     rejected: { bg: "#FCEBEB", color: "#791F1F", label: "Rejected" },
@@ -1475,31 +1480,31 @@ function AdminQuestions() {
 
   const ipt = (val, onChange, ph = "", type = "text") => (
     <input type={type} value={val} onChange={e => onChange(e.target.value)} placeholder={ph}
-      style={{ width: "100%", padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
+      style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
   );
 
   if (editing !== null) return (
     <div style={{ padding: 20 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <button onClick={cancelEdit} style={{ fontSize: 12, padding: "5px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 7, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+        <button onClick={cancelEdit} style={{ fontSize: 12, padding: "5px 10px", border: "1px solid var(--color-border-secondary)", borderRadius: 7, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
           <i className="ti ti-arrow-left" style={{ fontSize: 12 }} /> Back
         </button>
         <div style={{ fontSize: 16, fontWeight: 500 }}>{editing === "new" ? "Add new question" : "Edit question"}</div>
       </div>
 
-      <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 20, maxWidth: 700 }}>
+      <div style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 20, maxWidth: 700 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
           <div>
             <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Category</label>
             <select value={form.cat} onChange={e => setForm(f => ({ ...f, cat: e.target.value }))}
-              style={{ width: "100%", padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
+              style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
               {CATS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
             <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Difficulty</label>
             <select value={form.diff} onChange={e => setForm(f => ({ ...f, diff: e.target.value }))}
-              style={{ width: "100%", padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
+              style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
@@ -1512,28 +1517,28 @@ function AdminQuestions() {
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Question text <span style={{ color: "#1D9E75" }}>*</span></label>
+          <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Question text <span style={{ color: "#1a5f8f" }}>*</span></label>
           <textarea value={form.q} onChange={e => setForm(f => ({ ...f, q: e.target.value }))} rows={3} placeholder="Type your question here..."
-            style={{ width: "100%", padding: "8px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 13, background: "var(--color-background-primary)", color: "var(--color-text-primary)", resize: "vertical", fontFamily: "inherit" }} />
+            style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 13, background: "var(--color-background-primary)", color: "var(--color-text-primary)", resize: "vertical", fontFamily: "inherit" }} />
         </div>
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)" }}>Answer options <span style={{ color: "var(--color-text-tertiary)", fontWeight: 400 }}>(click radio to mark correct)</span></label>
-            {form.opts.length < 6 && <button onClick={addOpt} style={{ fontSize: 11, padding: "3px 8px", border: "0.5px solid #1D9E75", borderRadius: 6, cursor: "pointer", background: "#E1F5EE", color: "#0F6E56" }}>+ Add option</button>}
+            {form.opts.length < 6 && <button onClick={addOpt} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid #1a5f8f", borderRadius: 6, cursor: "pointer", background: "#eef3f8", color: "#103a56" }}>+ Add option</button>}
           </div>
           {form.opts.map((opt, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <div onClick={() => setForm(f => ({ ...f, correct: i }))}
-                style={{ width: 18, height: 18, borderRadius: "50%", border: form.correct === i ? "2px solid #1D9E75" : "1.5px solid var(--color-border-secondary)", cursor: "pointer", background: form.correct === i ? "#1D9E75" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                style={{ width: 18, height: 18, borderRadius: "50%", border: form.correct === i ? "2px solid #1a5f8f" : "1.5px solid var(--color-border-secondary)", cursor: "pointer", background: form.correct === i ? "#1a5f8f" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {form.correct === i && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
               </div>
               <div style={{ flex: 1 }}>
                 <input value={opt} onChange={e => setOpt(i, e.target.value)} placeholder={`Option ${i + 1}${form.correct === i ? " (correct)" : ""}`}
-                  style={{ width: "100%", padding: "7px 10px", border: `0.5px solid ${form.correct === i ? "#1D9E75" : "var(--color-border-tertiary)"}`, borderRadius: 7, fontSize: 12, background: form.correct === i ? "#E1F5EE" : "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
+                  style={{ width: "100%", padding: "7px 10px", border: `1px solid ${form.correct === i ? "#1a5f8f" : "var(--color-border-tertiary)"}`, borderRadius: 7, fontSize: 12, background: form.correct === i ? "#eef3f8" : "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
               </div>
               {form.opts.length > 2 && (
-                <button onClick={() => removeOpt(i)} style={{ fontSize: 11, padding: "4px 7px", border: "0.5px solid #F5C4B3", borderRadius: 6, cursor: "pointer", background: "#FAECE7", color: "#993C1D", flexShrink: 0 }}>
+                <button onClick={() => removeOpt(i)} style={{ fontSize: 11, padding: "4px 7px", border: "1px solid #F5C4B3", borderRadius: 6, cursor: "pointer", background: "#FAECE7", color: "#993C1D", flexShrink: 0 }}>
                   <i className="ti ti-x" style={{ fontSize: 11 }} />
                 </button>
               )}
@@ -1544,15 +1549,15 @@ function AdminQuestions() {
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 }}>Explanation (shown after answering)</label>
           <textarea value={form.exp} onChange={e => setForm(f => ({ ...f, exp: e.target.value }))} rows={2} placeholder="Explain why the correct answer is correct..."
-            style={{ width: "100%", padding: "8px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)", resize: "vertical", fontFamily: "inherit" }} />
+            style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 7, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)", resize: "vertical", fontFamily: "inherit" }} />
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={handleSave} disabled={saving}
-            style={{ fontSize: 13, padding: "8px 20px", border: "none", borderRadius: 8, cursor: saving ? "wait" : "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+            style={{ fontSize: 13, padding: "8px 20px", border: "none", borderRadius: 8, cursor: saving ? "wait" : "pointer", background: "#1a5f8f", color: "#fff", fontWeight: 500 }}>
             {saving ? "Saving..." : "Save question"}
           </button>
-          <button onClick={cancelEdit} style={{ fontSize: 13, padding: "8px 16px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>Cancel</button>
+          <button onClick={cancelEdit} style={{ fontSize: 13, padding: "8px 16px", border: "1px solid var(--color-border-secondary)", borderRadius: 8, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>Cancel</button>
         </div>
       </div>
     </div>
@@ -1567,56 +1572,56 @@ function AdminQuestions() {
             {questions.length} custom question{questions.length !== 1 ? "s" : ""} — these are added to the question pool alongside the built-in 60
           </div>
         </div>
-        <button onClick={startNew} style={{ fontSize: 13, padding: "8px 16px", border: "none", borderRadius: 8, cursor: "pointer", background: "#1D9E75", color: "#fff", fontWeight: 500 }}>
+        <button onClick={startNew} style={{ fontSize: 13, padding: "8px 16px", border: "none", borderRadius: 8, cursor: "pointer", background: "#1a5f8f", color: "#fff", fontWeight: 500 }}>
           <i className="ti ti-plus" style={{ fontSize: 13 }} /> Add question
         </button>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search questions..."
-          style={{ flex: 1, padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 8, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
+          style={{ flex: 1, padding: "7px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 8, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }} />
         <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
-          style={{ padding: "7px 10px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 8, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
+          style={{ padding: "7px 10px", border: "1px solid var(--color-border-tertiary)", borderRadius: 8, fontSize: 12, background: "var(--color-background-primary)", color: "var(--color-text-primary)" }}>
           <option value="all">All categories</option>
           {CATS.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
 
       {filtered.length === 0
-        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
+        ? <div style={{ textAlign: "center", padding: "48px 20px", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", color: "var(--color-text-tertiary)" }}>
             <i className="ti ti-list-check" style={{ fontSize: 32, display: "block", marginBottom: 8 }} />
             <div style={{ fontSize: 14, fontWeight: 500 }}>{questions.length === 0 ? "No custom questions yet" : "No questions match your search"}</div>
             <div style={{ fontSize: 12, marginTop: 4 }}>Click "Add question" to create your first custom question</div>
           </div>
         : filtered.map(q => (
-          <div key={q.id} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 14, marginBottom: 8 }}>
+          <div key={q.id} style={{ background: "var(--color-background-primary)", border: "1px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: 14, marginBottom: 8 }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: "#E6F1FB", color: "#0C447C", fontWeight: 500 }}>{q.cat}</span>
-                  <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: q.diff === "hard" ? "#FCEBEB" : q.diff === "medium" ? "#FAEEDA" : "#E1F5EE", color: q.diff === "hard" ? "#791F1F" : q.diff === "medium" ? "#633806" : "#085041", fontWeight: 500 }}>{q.diff}</span>
+                  <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: q.diff === "hard" ? "#FCEBEB" : q.diff === "medium" ? "#FAEEDA" : "#eef3f8", color: q.diff === "hard" ? "#791F1F" : q.diff === "medium" ? "#633806" : "#0b2839", fontWeight: 500 }}>{q.diff}</span>
                   {q.ref && <span style={{ fontSize: 10, color: "var(--color-text-tertiary)" }}>{q.ref}</span>}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, lineHeight: 1.5 }}>{q.q}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
                   {q.opts.map((o, i) => (
-                    <div key={i} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, background: i === q.correct ? "#E1F5EE" : "var(--color-background-secondary)", color: i === q.correct ? "#0F6E56" : "var(--color-text-secondary)", border: i === q.correct ? "0.5px solid #9FE1CB" : "none", fontWeight: i === q.correct ? 500 : 400 }}>
+                    <div key={i} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, background: i === q.correct ? "#eef3f8" : "var(--color-background-secondary)", color: i === q.correct ? "#103a56" : "var(--color-text-secondary)", border: i === q.correct ? "1px solid #99bbd3" : "none", fontWeight: i === q.correct ? 500 : 400 }}>
                       {i === q.correct && <i className="ti ti-check" style={{ fontSize: 10, marginRight: 3 }} />}{o}
                     </div>
                   ))}
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
-                <button onClick={() => startEdit(q)} style={{ fontSize: 11, padding: "5px 10px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 7, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
+                <button onClick={() => startEdit(q)} style={{ fontSize: 11, padding: "5px 10px", border: "1px solid var(--color-border-secondary)", borderRadius: 7, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>
                   <i className="ti ti-pencil" style={{ fontSize: 11 }} /> Edit
                 </button>
                 {confirmDel === q.id
                   ? <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       <span style={{ fontSize: 10, color: "#993C1D", textAlign: "center" }}>Delete?</span>
-                      <button onClick={() => handleDelete(q.id)} style={{ fontSize: 11, padding: "3px 8px", border: "0.5px solid #E24B4A", borderRadius: 6, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D" }}>Yes</button>
-                      <button onClick={() => setConfirmDel(null)} style={{ fontSize: 11, padding: "3px 8px", border: "0.5px solid var(--color-border-secondary)", borderRadius: 6, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>No</button>
+                      <button onClick={() => handleDelete(q.id)} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid #E24B4A", borderRadius: 6, cursor: "pointer", background: "#FCEBEB", color: "#A32D2D" }}>Yes</button>
+                      <button onClick={() => setConfirmDel(null)} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--color-border-secondary)", borderRadius: 6, cursor: "pointer", background: "transparent", color: "var(--color-text-secondary)" }}>No</button>
                     </div>
-                  : <button onClick={() => setConfirmDel(q.id)} style={{ fontSize: 11, padding: "5px 10px", border: "0.5px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "#FAECE7", color: "#993C1D" }}>
+                  : <button onClick={() => setConfirmDel(q.id)} style={{ fontSize: 11, padding: "5px 10px", border: "1px solid #F5C4B3", borderRadius: 7, cursor: "pointer", background: "#FAECE7", color: "#993C1D" }}>
                       <i className="ti ti-trash" style={{ fontSize: 11 }} /> Delete
                     </button>
                 }
